@@ -1,6 +1,7 @@
 import React, { Suspense, useEffect, useRef } from "react";
 import Editor, { type OnChange, type OnMount } from "@monaco-editor/react";
 import type * as Monaco from "monaco-editor";
+import { useTheme } from "next-themes";
 
 interface RevealRangeDetail {
   fileId: string;
@@ -25,6 +26,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   onCursorChange,
   onSave,
 }: CodeEditorProps) => {
+  const { resolvedTheme } = useTheme();
   const monacoRef = useRef<typeof Monaco | null>(null);
   const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
   const decorationIdsRef = useRef<string[]>([]);
@@ -68,7 +70,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   };
 
   const defineTheme = (monaco: typeof Monaco) => {
-    // Define theme only once per mount.
+    // Define Stellars branded themes
     monaco.editor.defineTheme("stellar-dark", {
       base: "vs-dark",
       inherit: true,
@@ -84,8 +86,26 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
         "editorIndentGuide.activeBackground": "#45475a",
       },
     });
-    monaco.editor.setTheme("stellar-dark");
+
+    monaco.editor.defineTheme("stellar-light", {
+      base: "vs",
+      inherit: true,
+      rules: [],
+      colors: {
+        "editor.background": "#ffffff",
+        "editor.foreground": "#1e1e2e",
+        "editor.lineHighlightBackground": "#f5f5f5",
+        "editor.selectionBackground": "#e0e0e0",
+      },
+    });
   };
+
+  useEffect(() => {
+    if (monacoRef.current) {
+      const targetTheme = resolvedTheme === "dark" ? "stellar-dark" : "stellar-light";
+      monacoRef.current.editor.setTheme(targetTheme);
+    }
+  }, [resolvedTheme]);
 
   const handleEditorDidMount: OnMount = (editor, monaco) => {
     monacoRef.current = monaco;
@@ -156,7 +176,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           defaultLanguage={language}
           language={language}
           value={content}
-          theme="stellar-dark"
+          theme={resolvedTheme === "dark" ? "stellar-dark" : "stellar-light"}
           onChange={handleEditorChange}
           onMount={handleEditorDidMount}
           options={{
