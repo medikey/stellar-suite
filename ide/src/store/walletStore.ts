@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { WalletService, WalletProviderType } from "../wallet/WalletService";
+import { checkFreighterInstalled, connectFreighterWallet, getFreighterPublicKey } from "../utils/freighter";
 
 interface WalletState {
   isConnected: boolean;

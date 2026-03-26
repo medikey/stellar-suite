@@ -1,9 +1,19 @@
-import { Network, Settings, TestTube, Upload, Menu, X, Play } from "lucide-react";
+import {
+  Network,
+  Settings,
+  TestTube,
+  Upload,
+  Menu,
+  X,
+  Play,
+  Github,
+} from "lucide-react";
 import { useState } from "react";
 
 import { BuildButton } from "@/components/ide/BuildButton";
 import { Button } from "@/components/ui/button";
 import { type NetworkKey } from "@/lib/networkConfig";
+import ImportGithubModal from "@/components/ide/ImportGithubModal";
 import { WalletManager } from "@/components/WalletManager";
 
 type BuildState = "idle" | "building" | "success" | "error";
@@ -30,19 +40,23 @@ export function Toolbar({
   saveStatus,
 }: ToolbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
 
   return (
     <div className="border-b border-border bg-toolbar-bg">
+      {/* Desktop */}
       <div className="hidden items-center justify-between px-3 py-1.5 md:flex">
         <div className="flex items-center gap-2">
           <span className="mr-2 font-mono text-sm font-semibold text-primary">
             Kit CANVAS
           </span>
+
           <BuildButton
             onClick={onCompile}
             isBuilding={isCompiling}
             state={isCompiling ? "building" : buildState}
           />
+
           <Button
             onClick={onDeploy}
             variant="ghost"
@@ -52,6 +66,7 @@ export function Toolbar({
             <Upload className="h-3.5 w-3.5" />
             Deploy
           </Button>
+
           <Button
             type="button"
             variant="ghost"
@@ -62,12 +77,25 @@ export function Toolbar({
             <TestTube className="h-3.5 w-3.5" />
             Test
           </Button>
+
+          {/* ✅ NEW: Import GitHub */}
+          <Button
+            onClick={() => setImportOpen(true)}
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-xs h-8"
+          >
+            <Github className="h-3.5 w-3.5" />
+            Import
+          </Button>
+
           {saveStatus && (
             <span className="ml-2 font-mono text-[10px] text-muted-foreground">
               {saveStatus}
             </span>
           )}
         </div>
+
         <div className="flex items-center gap-3">
           <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Network className="h-3.5 w-3.5" />
@@ -89,11 +117,13 @@ export function Toolbar({
         </div>
       </div>
 
+      {/* Mobile */}
       <div className="flex items-center justify-between px-2 py-1.5 md:hidden">
         <div className="flex items-center gap-2">
           <span className="font-mono text-xs font-semibold text-primary">
             Kit CANVAS
           </span>
+
           <BuildButton
             onClick={onCompile}
             isBuilding={isCompiling}
@@ -101,10 +131,14 @@ export function Toolbar({
             compact
           />
         </div>
+
         <div className="flex items-center gap-1">
           {saveStatus && (
-            <span className="font-mono text-[9px] text-muted-foreground">{saveStatus}</span>
+            <span className="font-mono text-[9px] text-muted-foreground">
+              {saveStatus}
+            </span>
           )}
+
           <select
             value={network}
             onChange={(e) => onNetworkChange(e.target.value as NetworkKey)}
@@ -123,14 +157,18 @@ export function Toolbar({
             className="p-1.5 text-muted-foreground hover:text-foreground"
             aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            {mobileMenuOpen ? (
+              <X className="h-4 w-4" />
+            ) : (
+              <Menu className="h-4 w-4" />
+            )}
           </button>
         </div>
       </div>
 
       {/* Mobile dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden flex gap-2 px-2 pb-2 border-b border-border">
+        <div className="md:hidden flex flex-col gap-2 px-2 pb-2 border-b border-border">
           <Button
             onClick={() => {
               onCompile();
@@ -142,6 +180,7 @@ export function Toolbar({
             <Play className="h-3 w-3" />
             {isCompiling ? "..." : "Build"}
           </Button>
+
           <Button
             onClick={() => {
               onDeploy();
@@ -153,6 +192,7 @@ export function Toolbar({
             <Upload className="h-3 w-3" />
             Deploy
           </Button>
+
           <Button
             type="button"
             variant="outline"
@@ -164,8 +204,27 @@ export function Toolbar({
           >
             Test
           </Button>
+
+          {/* ✅ NEW: Mobile Import */}
+          <Button
+            variant="outline"
+            className="flex-1 gap-1 text-[11px] h-9"
+            onClick={() => {
+              setImportOpen(true);
+              setMobileMenuOpen(false);
+            }}
+          >
+            <Github className="h-3 w-3" />
+            Import GitHub
+          </Button>
         </div>
       )}
+
+      {/* ✅ Modal Mount */}
+      <ImportGithubModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+      />
     </div>
   );
 }
